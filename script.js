@@ -919,7 +919,7 @@ document.addEventListener('DOMContentLoaded', () => {
         saveDataPending = false;
         localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
         markLocalDataUpdated(Date.now());
-        scheduleAutoSyncPush(false);
+        scheduleAutoSyncPush(true);
     }
 
     function saveData(options = {}) {
@@ -1191,7 +1191,19 @@ document.addEventListener('DOMContentLoaded', () => {
             const message = await response.text().catch(() => `HTTP ${response.status}`);
             throw new Error(`Dropbox download failed: ${message}`);
         }
-        return response.text();
+        const apiResultRaw = response.headers.get('Dropbox-API-Result') || '';
+        let apiResult = {};
+        try {
+            apiResult = JSON.parse(apiResultRaw);
+        } catch (error) {
+            apiResult = {};
+        }
+        const rev = typeof apiResult?.rev === 'string' ? apiResult.rev : '';
+        const serverModifiedRaw = String(apiResult?.server_modified || '');
+        const serverModifiedTs = Date.parse(serverModifiedRaw);
+        const serverModifiedAt = Number.isFinite(serverModifiedTs) ? serverModifiedTs : 0;
+        const text = await response.text();
+        return { text, rev, serverModifiedAt };
     }
 
     async function getStoredSyncFileHandle() {
@@ -1334,39 +1346,76 @@ document.addEventListener('DOMContentLoaded', () => {
         const accessToken = await getDropboxAccessTokenNonInteractive();
         if (!accessToken) return null;
         const fileName = getDropboxSyncFileName();
-        const text = await downloadDropboxSyncFile(accessToken, fileName);
-        const payload = JSON.parse(String(text || '{}'));
+        const downloaded = await downloadDropboxSyncFile(accessToken, fileName);
+        const payload = JSON.parse(String(downloaded?.text || '{}'));
         setSyncDropboxMeta({
             fileName,
             lastPullAt: Date.now(),
+            lastSeenRev: downloaded?.rev || '',
+            lastSeenServerModifiedAt: downloaded?.serverModifiedAt || 0,
             lastError: '',
             lastErrorAt: 0
         });
-        return payload;
+        return {
+            payload,
+            rev: downloaded?.rev || '',
+            serverModifiedAt: downloaded?.serverModifiedAt || 0
+        };
     }
 
     async function autoSyncPullOnStartup() {
         const candidates = [];
         try {
             const fromFile = await pullPayloadFromLocalFileAuto();
-            if (fromFile) candidates.push({ source: 'file', payload: fromFile });
+            if (fromFile) {
+                candidates.push({
+                    source: 'file',
+                    payload: fromFile,
+                    sortUpdatedAt: getPayloadUpdatedAt(fromFile),
+                    rev: '',
+                    serverModifiedAt: 0
+                });
+            }
         } catch (error) {
             setSyncLocalMeta({ lastError: String(error?.message || 'pull error'), lastErrorAt: Date.now() });
         }
         try {
             const fromDropbox = await pullPayloadFromDropboxAuto();
-            if (fromDropbox) candidates.push({ source: 'dropbox', payload: fromDropbox });
+            if (fromDropbox?.payload) {
+                const payloadUpdatedAt = getPayloadUpdatedAt(fromDropbox.payload);
+                const serverUpdatedAt = Number(fromDropbox.serverModifiedAt || 0);
+                candidates.push({
+                    source: 'dropbox',
+                    payload: fromDropbox.payload,
+                    sortUpdatedAt: Math.max(payloadUpdatedAt, serverUpdatedAt, 0),
+                    rev: fromDropbox.rev || '',
+                    serverModifiedAt: serverUpdatedAt
+                });
+            }
         } catch (error) {
             setSyncDropboxMeta({ lastError: String(error?.message || 'pull error'), lastErrorAt: Date.now() });
         }
         if (!candidates.length) return;
 
-        candidates.sort((a, b) => getPayloadUpdatedAt(b.payload) - getPayloadUpdatedAt(a.payload));
-        const newest = candidates[0].payload;
-        const remoteUpdatedAt = getPayloadUpdatedAt(newest);
+        candidates.sort((a, b) => (Number(b.sortUpdatedAt || 0) - Number(a.sortUpdatedAt || 0)));
+        const newest = candidates[0];
+        const remoteUpdatedAt = getPayloadUpdatedAt(newest.payload);
         const localUpdatedAt = getLocalDataUpdatedAt();
-        if (remoteUpdatedAt && localUpdatedAt && remoteUpdatedAt <= localUpdatedAt) return;
-        await applySyncedPayload(newest);
+        const dropboxMeta = getSyncDropboxMeta();
+        const lastAppliedRev = String(dropboxMeta?.lastAppliedRev || '').trim();
+        const revChanged = newest.source === 'dropbox'
+            && !!newest.rev
+            && newest.rev !== lastAppliedRev;
+        if (remoteUpdatedAt && localUpdatedAt && remoteUpdatedAt <= localUpdatedAt && !revChanged) return;
+        const applied = await applySyncedPayload(newest.payload);
+        if (applied && newest.source === 'dropbox') {
+            const patch = {};
+            if (newest.rev) patch.lastAppliedRev = newest.rev;
+            if (Number.isFinite(newest.serverModifiedAt) && newest.serverModifiedAt > 0) {
+                patch.lastAppliedServerModifiedAt = newest.serverModifiedAt;
+            }
+            if (Object.keys(patch).length) setSyncDropboxMeta(patch);
+        }
     }
 
     function shouldPushAfterStartup() {
