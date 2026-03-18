@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const FAVICON_SIZE_COMPACT = 32;
     const FAVICON_FALLBACK_ICON = 'icons/icon-32.png';
     const HIDE_RIGHT_SIDEBAR_QUERY = '(min-width: 901px) and (max-width: 1100px)';
+    const POPUP_PERMISSION_STATE_KEY = 'airtabPopupPermissionState';
 
     let performanceMode = localStorage.getItem('airtabPerformanceMode') || 'balanced';
     if (performanceMode !== 'eco') performanceMode = 'balanced';
@@ -1808,11 +1809,77 @@ document.addEventListener('DOMContentLoaded', () => {
         renderSidebars();
     }
 
+    function getPopupPermissionState() {
+        const raw = String(localStorage.getItem(POPUP_PERMISSION_STATE_KEY) || '').trim().toLowerCase();
+        if (raw === 'granted' || raw === 'blocked' || raw === 'dismissed') return raw;
+        return '';
+    }
+
+    function setPopupPermissionState(state) {
+        const normalized = state === 'granted' || state === 'blocked' || state === 'dismissed'
+            ? state
+            : 'dismissed';
+        localStorage.setItem(POPUP_PERMISSION_STATE_KEY, normalized);
+    }
+
+    function updatePopupPermissionStatus(text, type = 'neutral') {
+        const statusEl = document.getElementById('popupPermissionStatus');
+        if (!statusEl) return;
+        statusEl.textContent = text;
+        statusEl.classList.remove('error', 'success');
+        if (type === 'error' || type === 'success') {
+            statusEl.classList.add(type);
+        }
+    }
+
+    function requestPopupPermissionNow() {
+        let popup = null;
+        try {
+            popup = window.open('about:blank', '_blank', 'width=240,height=160');
+        } catch (error) {
+            popup = null;
+        }
+        if (popup) {
+            try {
+                popup.close();
+            } catch (error) {
+                // ignore popup close issues
+            }
+            setPopupPermissionState('granted');
+            updatePopupPermissionStatus(
+                trKey('popupPermissionGranted', 'Готово. Доступ к popup-вкладкам разрешён.'),
+                'success'
+            );
+            window.setTimeout(() => closeModal('popupPermissionModal'), 260);
+            return true;
+        }
+        setPopupPermissionState('blocked');
+        updatePopupPermissionStatus(
+            trKey(
+                'popupPermissionBlocked',
+                'Popup-доступ пока заблокирован. Разрешите всплывающие окна для `airtabs.github.io` в настройках сайта и нажмите «Разрешить» снова.'
+            ),
+            'error'
+        );
+        return false;
+    }
+
+    function maybeShowPopupPermissionModal() {
+        if (getPopupPermissionState()) return;
+        updatePopupPermissionStatus(
+            trKey('popupPermissionPrompt', 'Нажмите «Разрешить», чтобы проверить доступ сейчас.')
+        );
+        openModal('popupPermissionModal');
+    }
+
     function closeModal(id) {
         const modal = document.getElementById(id);
         if (modal) modal.classList.remove('active');
         if (document.activeElement && modal && modal.contains(document.activeElement)) {
             document.activeElement.blur();
+        }
+        if (id === 'popupPermissionModal' && !getPopupPermissionState()) {
+            setPopupPermissionState('dismissed');
         }
         if (id === 'settingsModal') {
             const bgInputLight = document.getElementById('bgInputLight');
@@ -5062,6 +5129,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    const btnPopupPermissionAllow = document.getElementById('btnPopupPermissionAllow');
+    if (btnPopupPermissionAllow) {
+        btnPopupPermissionAllow.addEventListener('click', () => {
+            requestPopupPermissionNow();
+        });
+    }
+
+    const btnPopupPermissionSkip = document.getElementById('btnPopupPermissionSkip');
+    if (btnPopupPermissionSkip) {
+        btnPopupPermissionSkip.addEventListener('click', () => {
+            setPopupPermissionState('dismissed');
+            closeModal('popupPermissionModal');
+        });
+    }
+
     const mainSettingsBtn = document.getElementById('mainSettingsBtn');
     if (mainSettingsBtn) {
         mainSettingsBtn.addEventListener('click', () => {
@@ -5974,5 +6056,6 @@ document.addEventListener('DOMContentLoaded', () => {
     renderItems();
     renderSpaces();
     renderSearchDropdown();
+    maybeShowPopupPermissionModal();
     runAutoSyncPull(true).catch(() => {});
 });

@@ -1519,6 +1519,7 @@
         }
         .modal-content.modal-folder { width: min(520px, 92vw); }
         .modal-content.modal-settings { width: min(640px, 94vw); }
+        .modal-content.modal-popup-permission { width: min(520px, 92vw); }
         .modal.active .modal-content { transform: translateY(0) scale(1); animation: modalIn var(--motion-med) both; }
         @keyframes modalIn { from { opacity: 0; transform: translateY(12px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .modal-content h3 { margin-top: 0; margin-bottom: 15px; font-size: 16px; border-bottom: 1px solid var(--outline); padding-bottom: 8px;}
@@ -1548,6 +1549,25 @@
             box-shadow:
                 0 0 0 3px color-mix(in srgb, var(--primary) 24%, transparent),
                 inset 0 1px 0 color-mix(in srgb, #ffffff 18%, transparent);
+        }
+        .popup-permission-status {
+            margin: 10px 0 14px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--outline);
+            background: color-mix(in srgb, var(--surface-2) 88%, transparent);
+            font-size: 13px;
+            line-height: 1.4;
+        }
+        .popup-permission-status.error {
+            border-color: rgba(207, 37, 54, 0.42);
+            color: #d84459;
+            background: color-mix(in srgb, rgba(207, 37, 54, 0.12) 68%, var(--surface-2));
+        }
+        .popup-permission-status.success {
+            border-color: rgba(14, 111, 47, 0.42);
+            color: #129247;
+            background: color-mix(in srgb, rgba(14, 111, 47, 0.12) 68%, var(--surface-2));
         }
         .modal-content select {
             appearance: none;
@@ -2214,6 +2234,19 @@
     <div class="dnd-debug is-hidden" id="dndDebug" aria-live="polite" aria-hidden="true">
         <div class="dnd-debug-title">DND Debug</div>
         <pre class="dnd-debug-log" id="dndDebugLog">Ожидание drag-and-drop событий...</pre>
+    </div>
+
+    <div class="modal" id="popupPermissionModal">
+        <div class="modal-content modal-popup-permission">
+            <button type="button" class="modal-close" data-close="popupPermissionModal" aria-label="Закрыть">✕</button>
+            <h3>Разрешение на открытие вкладок</h3>
+            <div class="setting-hint">AirTab открывает сразу несколько вкладок, когда вы запускаете папку или выделенные ярлыки. Для этого браузеру нужно разрешить всплывающие окна для `airtabs.github.io`.</div>
+            <div class="popup-permission-status" id="popupPermissionStatus">Нажмите «Разрешить», чтобы проверить доступ сейчас.</div>
+            <div class="btn-row">
+                <button type="button" class="btn btn-cancel" id="btnPopupPermissionSkip">Не сейчас</button>
+                <button type="button" class="btn btn-primary" id="btnPopupPermissionAllow">Разрешить</button>
+            </div>
+        </div>
     </div>
 
     <!-- Модалка Элемента (ярлык/папка) -->
