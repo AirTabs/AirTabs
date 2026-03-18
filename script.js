@@ -79,7 +79,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
     const rightSidebarQuery = window.matchMedia(HIDE_RIGHT_SIDEBAR_QUERY);
     const mobileCommandModeQuery = window.matchMedia('(max-width: 900px)');
+    const coarsePointerQuery = window.matchMedia('(pointer: coarse)');
     let rightSidebarHidden = rightSidebarQuery.matches;
+
+    function applyMobileUiClass() {
+        const isMobileUi = mobileCommandModeQuery.matches || coarsePointerQuery.matches;
+        document.body.classList.toggle('is-mobile-ui', isMobileUi);
+    }
+    applyMobileUiClass();
 
     let data = loadData();
     if (!localStorage.getItem(SYNC_LAST_LOCAL_UPDATED_AT_KEY)) {
@@ -1600,10 +1607,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     mobileCommandModeQuery.addEventListener('change', (e) => {
+        applyMobileUiClass();
         if (!e.matches && mobileCommandMode) {
             setMobileCommandMode(false, { clearSelection: true });
         }
         resetMobileBottomVisibilityOnViewportChange();
+    });
+
+    coarsePointerQuery.addEventListener('change', () => {
+        applyMobileUiClass();
     });
 
     function getBrightness(color) {
