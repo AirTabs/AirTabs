@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+(() => {
+    const boot = () => {
     const i18n = window.AirTabI18n || null;
     const extensionApi = (typeof globalThis !== 'undefined' && globalThis.chrome && globalThis.chrome.runtime?.id)
         ? globalThis.chrome
@@ -6142,4 +6143,11 @@ document.addEventListener('DOMContentLoaded', () => {
     renderSearchDropdown();
     maybeShowPopupPermissionModal();
     runAutoSyncPull(true).catch(() => {});
-});
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
+})();

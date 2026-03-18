@@ -1,13 +1,8 @@
-const CACHE_VERSION = 'airtab-web-v2';
+const CACHE_VERSION = 'airtab-web-v3';
 const APP_SHELL = [
     './',
     './index.html',
-    './options/',
-    './options/index.html',
-    './options.html',
     './script.js',
-    './options.js',
-    './i18n.js',
     './preload.js',
     './web-bootstrap.js',
     './manifest.webmanifest',
@@ -17,8 +12,7 @@ const APP_SHELL = [
     './icons/icon-24.png',
     './icons/icon-32.png',
     './icons/icon-48.png',
-    './icons/icon-128.png',
-    './oauth/dropbox-callback.html'
+    './icons/icon-128.png'
 ];
 
 self.addEventListener('install', (event) => {

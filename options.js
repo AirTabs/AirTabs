@@ -1,4 +1,5 @@
-document.addEventListener('DOMContentLoaded', () => {
+(() => {
+    const boot = () => {
     const i18n = window.AirTabI18n || null;
     const extensionApi = (typeof globalThis !== 'undefined' && globalThis.chrome && globalThis.chrome.runtime?.id)
         ? globalThis.chrome
@@ -2672,4 +2673,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applySyncModeUi();
     updateSyncUi().catch(() => {});
     if (i18n) i18n.translateDocument(document.body);
-});
+    };
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', boot, { once: true });
+    } else {
+        boot();
+    }
+})();
