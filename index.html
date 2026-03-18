@@ -2149,7 +2149,7 @@
     <button type="button" class="space-action-zone space-trash-zone" id="spaceTrashZone" aria-label="Удалить пространство">🗑</button>
     <button type="button" class="mobile-command-btn" id="mobileCommandBtn" aria-label="Режим выбора и быстрые действия" aria-pressed="false" title="Режим выбора">✎</button>
     <button type="button" class="settings-btn" id="quickOptionsBtn" aria-label="Параметры AirTab" title="Параметры AirTab">⚙</button>
-    <div class="dnd-debug" id="dndDebug" aria-live="polite">
+    <div class="dnd-debug is-hidden" id="dndDebug" aria-live="polite" aria-hidden="true">
         <div class="dnd-debug-title">DND Debug</div>
         <pre class="dnd-debug-log" id="dndDebugLog">Ожидание drag-and-drop событий...</pre>
     </div>
@@ -2169,9 +2169,9 @@
 
             <div id="linkFields" class="modal-section">
                 <label>Название</label>
-                <input type="text" id="linkName" placeholder="ВКонтакте">
+                <input type="text" id="linkName" placeholder="AirTabs">
                 <label>URL сайта</label>
-                <input type="text" id="linkUrl" placeholder="vk.com">
+                <input type="text" id="linkUrl" placeholder="airtabs.github.io">
                 <label>URL своей иконки (необязательно)</label>
                 <input type="text" id="linkIcon" placeholder="Оставьте пустым для авто">
             </div>
