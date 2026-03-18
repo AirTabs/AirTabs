@@ -1127,6 +1127,17 @@ document.addEventListener('DOMContentLoaded', () => {
         return '';
     }
 
+    async function requireDropboxAccessTokenForAutoSync() {
+        const accessToken = await getDropboxAccessTokenNonInteractive();
+        if (accessToken) return accessToken;
+        throw new Error(
+            trKey(
+                'dropboxNotAuthorized',
+                'Dropbox не авторизован. Нажмите "Авторизоваться через Dropbox" в настройках AirTab.'
+            )
+        );
+    }
+
     function normalizeDropboxPath(fileName) {
         const clean = String(fileName || '').trim() || DEFAULT_SYNC_FILE_NAME;
         return clean.startsWith('/') ? clean : `/${clean}`;
@@ -1343,8 +1354,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pullPayloadFromDropboxAuto() {
         if (!isDropboxSyncConnected()) return null;
-        const accessToken = await getDropboxAccessTokenNonInteractive();
-        if (!accessToken) return null;
+        const accessToken = await requireDropboxAccessTokenForAutoSync();
         const fileName = getDropboxSyncFileName();
         const downloaded = await downloadDropboxSyncFile(accessToken, fileName);
         const payload = JSON.parse(String(downloaded?.text || '{}'));
@@ -1495,8 +1505,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function pushPayloadToDropboxAuto(payloadJson) {
         if (!isDropboxSyncConnected()) return;
-        const accessToken = await getDropboxAccessTokenNonInteractive();
-        if (!accessToken) return;
+        const accessToken = await requireDropboxAccessTokenForAutoSync();
         const fileName = getDropboxSyncFileName();
         await uploadDropboxSyncFile(accessToken, fileName, payloadJson);
         setSyncDropboxMeta({
