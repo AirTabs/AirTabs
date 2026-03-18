@@ -1184,10 +1184,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            transition: transform var(--motion-fast), box-shadow var(--motion-fast);
+            transition: opacity var(--motion-fast), transform var(--motion-fast), box-shadow var(--motion-fast);
             box-shadow: var(--shadow-2);
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(8px) scale(0.95);
         }
-        .settings-btn:hover { transform: translateY(-2px); }
+        body.modifier-options-visible .settings-btn {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0) scale(1);
+        }
+        .settings-btn:hover { transform: translateY(-2px) scale(1.02); }
 
         .spaces-nav {
             position: fixed;
@@ -1977,7 +1985,7 @@
                 <form class="search-wrapper" id="searchForm">
                     <div class="engine-dropdown-container">
                         <button type="button" class="engine-btn" id="currentEngineBtn" aria-label="Выбрать поисковую систему">
-                            <img id="currentEngineIcon" src="https://www.google.com/favicon.ico" alt="Google">
+                            <img id="currentEngineIcon" src="https://kagi.com/favicon.ico" alt="Kagi">
                         </button>
                         <div class="engine-list" id="engineListMenu"></div>
                     </div>
@@ -2028,6 +2036,7 @@
     </div>
     <button type="button" class="space-action-zone space-edit-zone" id="spaceEditZone" aria-label="Редактировать пространство">✎</button>
     <button type="button" class="space-action-zone space-trash-zone" id="spaceTrashZone" aria-label="Удалить пространство">🗑</button>
+    <button type="button" class="settings-btn" id="quickOptionsBtn" aria-label="Параметры AirTab" title="Параметры AirTab">⚙</button>
     <div class="dnd-debug" id="dndDebug" aria-live="polite">
         <div class="dnd-debug-title">DND Debug</div>
         <pre class="dnd-debug-log" id="dndDebugLog">Ожидание drag-and-drop событий...</pre>

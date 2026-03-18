@@ -15,14 +15,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const STORAGE_KEY = 'airtabData';
     const DATA_VERSION = 2;
-    const defaultLinks = [
-        { name: 'Google', url: 'https://google.com', customIcon: '', isCompact: false },
-        { name: 'YouTube', url: 'https://youtube.com', customIcon: '', isCompact: false }
-    ];
+    const defaultLinks = [];
     const defaultEngines = [
-        { id: 1, name: 'Google', url: 'https://www.google.com/search?q=', icon: 'https://www.google.com/favicon.ico' },
-        { id: 2, name: 'Яндекс', url: 'https://yandex.ru/search/?text=', icon: 'https://yandex.ru/favicon.ico' },
-        { id: 3, name: 'Perplexity', url: 'https://www.perplexity.ai/search?q=', icon: 'https://www.perplexity.ai/favicon.ico' }
+        { id: 1, name: 'Kagi', url: 'https://kagi.com/search?q=', icon: 'https://kagi.com/favicon.ico' }
     ];
     const defaultBgLight = '#f2f2f7';
     const defaultBgDark = '#2c2c2e';

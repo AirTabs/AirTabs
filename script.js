@@ -16,15 +16,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const STORAGE_KEY = 'airtabData';
     const DATA_VERSION = 2;
 
-    const defaultLinks = [
-        { name: "Google", url: "https://google.com", customIcon: "", isCompact: false },
-        { name: "YouTube", url: "https://youtube.com", customIcon: "", isCompact: false }
-    ];
+    const defaultLinks = [];
 
     const defaultEngines = [
-        { id: 1, name: "Google", url: "https://www.google.com/search?q=", icon: "https://www.google.com/favicon.ico" },
-        { id: 2, name: "Яндекс", url: "https://yandex.ru/search/?text=", icon: "https://yandex.ru/favicon.ico" },
-        { id: 3, name: "Perplexity", url: "https://www.perplexity.ai/search?q=", icon: "https://www.perplexity.ai/favicon.ico" }
+        { id: 1, name: "Kagi", url: "https://kagi.com/search?q=", icon: "https://kagi.com/favicon.ico" }
     ];
 
     let engines = JSON.parse(localStorage.getItem('myEngines')) || defaultEngines;
@@ -2187,6 +2182,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const isFolderScope = selectionContext.scope === 'folder';
         document.body.classList.toggle('selection-mode', selectionActive);
         document.body.classList.toggle('modifier-hint', modifierPressed && !selectionActive);
+        document.body.classList.toggle('modifier-options-visible', modifierPressed);
         document.querySelectorAll('.drag-item.selected').forEach(el => {
             if (!selectedIds.has(el.dataset.id)) el.classList.remove('selected');
         });
@@ -4958,6 +4954,13 @@ document.addEventListener('DOMContentLoaded', () => {
             renderSpaceSettingsList();
             setSettingsTab(settingsTab);
             openModal('settingsModal');
+        });
+    }
+
+    const quickOptionsBtn = document.getElementById('quickOptionsBtn');
+    if (quickOptionsBtn) {
+        quickOptionsBtn.addEventListener('click', () => {
+            window.location.href = 'options.html';
         });
     }
 
