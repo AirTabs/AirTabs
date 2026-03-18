@@ -2623,6 +2623,33 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    const syncMetaKeys = new Set([
+        SYNC_LOCAL_META_KEY,
+        SYNC_GOOGLE_META_KEY,
+        SYNC_GOOGLE_FILE_NAME_KEY,
+        SYNC_GOOGLE_TOKEN_KEY,
+        SYNC_UI_MODE_KEY
+    ]);
+
+    window.addEventListener('storage', (e) => {
+        if (!e?.key || syncMetaKeys.has(e.key)) {
+            updateSyncUi().catch(() => {});
+        }
+    });
+    window.addEventListener('focus', () => {
+        updateSyncUi().catch(() => {});
+    });
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) updateSyncUi().catch(() => {});
+    });
+    const syncUiPollTimer = window.setInterval(() => {
+        if (document.hidden) return;
+        updateSyncUi().catch(() => {});
+    }, 5000);
+    window.addEventListener('beforeunload', () => {
+        window.clearInterval(syncUiPollTimer);
+    });
+
     initUiLanguageSelector();
     setTab(localStorage.getItem('settingsTab') || 'search');
     initThemeInputs();
