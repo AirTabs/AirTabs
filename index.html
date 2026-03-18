@@ -2062,16 +2062,23 @@
         }
 
         body.perf-memory .overlay {
-            opacity: calc(var(--overlay-opacity) * 0.55);
+            opacity: calc(var(--overlay-opacity) * 0.18);
         }
         body.perf-memory .search-wrapper,
         body.perf-memory .spaces-nav,
         body.perf-memory .sidebar-section,
         body.perf-memory .engine-list,
         body.perf-memory .modal,
+        body.perf-memory .modal-content,
         body.perf-memory .card-box,
+        body.perf-memory .card-box-wrap,
         body.perf-memory .compact-card,
-        body.perf-memory .tree-folder {
+        body.perf-memory .tree-folder,
+        body.perf-memory .pill-btn,
+        body.perf-memory .space-pill,
+        body.perf-memory .settings-btn,
+        body.perf-memory .tree-menu,
+        body.perf-memory .selection-chip {
             backdrop-filter: none !important;
             -webkit-backdrop-filter: none !important;
         }
@@ -2079,8 +2086,13 @@
         body.perf-memory .compact-card,
         body.perf-memory .sidebar-section,
         body.perf-memory .spaces-nav,
-        body.perf-memory .settings-btn {
-            box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12) !important;
+        body.perf-memory .settings-btn,
+        body.perf-memory .space-pill,
+        body.perf-memory .pill-btn,
+        body.perf-memory .tree-folder,
+        body.perf-memory .modal-content {
+            box-shadow: none !important;
+            filter: none !important;
         }
         body.perf-memory .grid .card-container,
         body.perf-memory .folder-grid .card-container,
@@ -2098,6 +2110,60 @@
         body.perf-memory .folder-grid .compact-wrapper,
         body.perf-memory .sidebar .tree-folder {
             contain-intrinsic-size: 220px 46px;
+        }
+        body.perf-memory .overlay,
+        body.perf-memory .container,
+        body.perf-memory .layout,
+        body.perf-memory .main-column,
+        body.perf-memory .sidebar,
+        body.perf-memory .grid,
+        body.perf-memory .folder-grid {
+            contain: layout paint style;
+        }
+        body.perf-memory .card-box-wrap:hover,
+        body.perf-memory .compact-card:hover,
+        body.perf-memory .space-pill:hover,
+        body.perf-memory .pill-btn:hover,
+        body.perf-memory .settings-btn:hover,
+        body.perf-memory .tree-folder:hover {
+            transform: none !important;
+            filter: none !important;
+        }
+        body.perf-memory *,
+        body.perf-memory *::before,
+        body.perf-memory *::after {
+            will-change: auto !important;
+        }
+
+        body.page-idle .overlay {
+            opacity: 0.05 !important;
+        }
+        body.page-idle .search-wrapper,
+        body.page-idle .spaces-nav,
+        body.page-idle .sidebar-section,
+        body.page-idle .engine-list,
+        body.page-idle .modal,
+        body.page-idle .modal-content,
+        body.page-idle .card-box,
+        body.page-idle .card-box-wrap,
+        body.page-idle .compact-card,
+        body.page-idle .tree-folder,
+        body.page-idle .pill-btn,
+        body.page-idle .space-pill,
+        body.page-idle .settings-btn,
+        body.page-idle .tree-menu,
+        body.page-idle .selection-chip {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            filter: none !important;
+        }
+        body.page-idle *,
+        body.page-idle *::before,
+        body.page-idle *::after {
+            animation: none !important;
+            transition: none !important;
+            will-change: auto !important;
         }
 
         html[data-airtab-browser="firefox"] {

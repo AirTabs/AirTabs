@@ -123,6 +123,7 @@
     const BASE_AUTO_SYNC_PUSH_DEBOUNCE_MS = 1400;
     const BASE_AUTO_SYNC_PULL_DEBOUNCE_MS = 700;
     const BASE_AUTO_SYNC_PULL_MIN_INTERVAL_MS = 4500;
+    const WEB_IDLE_VISUALS_TIMEOUT_MS = 1800;
     const FAVICON_SIZE_GRID = 48;
     const FAVICON_SIZE_COMPACT = 24;
     const FAVICON_FALLBACK_ICON = 'icons/icon-32.png';
@@ -1877,7 +1878,8 @@
         const lowMemoryDevice = Number.isFinite(deviceMemory) && deviceMemory > 0 && deviceMemory <= 8;
         const heavyByCount = itemCount >= 140;
         const mobileHeavy = coarsePointer && itemCount >= 90;
-        return lowMemoryDevice || heavyByCount || mobileHeavy;
+        const webBaseline = !extensionApi;
+        return webBaseline || lowMemoryDevice || heavyByCount || mobileHeavy;
     }
 
     function applyAdaptiveMemoryMode(space = getActiveSpace()) {
@@ -1902,6 +1904,35 @@
     }
 
     let externalThemeSyncRaf = 0;
+    let idleVisualsTimer = 0;
+
+    function clearIdleVisualsTimer() {
+        if (!idleVisualsTimer) return;
+        window.clearTimeout(idleVisualsTimer);
+        idleVisualsTimer = 0;
+    }
+
+    function setIdleVisualState(idle) {
+        document.body.classList.toggle('page-idle', !!idle);
+    }
+
+    function scheduleIdleVisualState() {
+        clearIdleVisualsTimer();
+        if (document.hidden) {
+            setIdleVisualState(true);
+            return;
+        }
+        setIdleVisualState(false);
+        idleVisualsTimer = window.setTimeout(() => {
+            idleVisualsTimer = 0;
+            if (!document.hidden) setIdleVisualState(true);
+        }, WEB_IDLE_VISUALS_TIMEOUT_MS);
+    }
+
+    function wakeVisualsFromInteraction() {
+        scheduleIdleVisualState();
+    }
+
     function syncThemeFromStorage() {
         if (externalThemeSyncRaf) cancelAnimationFrame(externalThemeSyncRaf);
         externalThemeSyncRaf = requestAnimationFrame(() => {
@@ -1971,11 +2002,13 @@
     });
 
     document.addEventListener('visibilitychange', () => {
+        scheduleIdleVisualState();
         if (document.hidden) return;
         scheduleAutoSyncPull({ immediate: false });
     });
 
     window.addEventListener('focus', () => {
+        wakeVisualsFromInteraction();
         scheduleAutoSyncPull({ immediate: false });
     });
 
@@ -6497,6 +6530,7 @@
     window.addEventListener('blur', () => {
         modifierPressed = false;
         updateSelectionUI();
+        setIdleVisualState(true);
     });
 
     window.addEventListener('pointerup', (e) => {
@@ -6536,6 +6570,11 @@
             updateSelectionUI();
         }
     });
+
+    window.addEventListener('pointerdown', wakeVisualsFromInteraction, { passive: true });
+    window.addEventListener('wheel', wakeVisualsFromInteraction, { passive: true });
+    window.addEventListener('touchstart', wakeVisualsFromInteraction, { passive: true });
+    window.addEventListener('keydown', wakeVisualsFromInteraction, { passive: true });
 
     document.addEventListener('keydown', (e) => {
         if (e.defaultPrevented) return;
@@ -6718,6 +6757,7 @@
     applySpaceTheme();
     hydrateLocalThemeBackgrounds();
     applyPerformanceMode();
+    scheduleIdleVisualState();
     requestAnimationFrame(() => document.documentElement.classList.remove('preload'));
     updateSelectionUI();
     renderItems();
