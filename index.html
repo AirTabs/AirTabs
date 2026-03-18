@@ -2206,6 +2206,23 @@
             will-change: auto !important;
         }
 
+        body.web-lite.perf-memory .grid .card-container,
+        body.web-lite.perf-memory .folder-grid .card-container,
+        body.web-lite.perf-memory .sidebar .compact-wrapper,
+        body.web-lite.perf-memory .folder-grid .compact-wrapper,
+        body.web-lite.perf-memory .sidebar .tree-folder,
+        body.web-lite.perf-memory .overlay,
+        body.web-lite.perf-memory .container,
+        body.web-lite.perf-memory .layout,
+        body.web-lite.perf-memory .main-column,
+        body.web-lite.perf-memory .sidebar,
+        body.web-lite.perf-memory .grid,
+        body.web-lite.perf-memory .folder-grid {
+            contain: none !important;
+            content-visibility: visible !important;
+            contain-intrinsic-size: auto !important;
+        }
+
         html[data-airtab-browser="firefox"] {
             --motion-fast: 140ms cubic-bezier(0.2, 0, 0, 1);
             --motion-med: 210ms cubic-bezier(0.2, 0, 0, 1);

@@ -1875,12 +1875,16 @@
     function shouldEnableAdaptiveMemoryMode(space = getActiveSpace()) {
         const itemCount = countItemsForMemoryProfile(space?.items || []);
         const coarsePointer = !!coarsePointerQuery?.matches;
+        const webClient = !extensionApi;
         const deviceMemory = Number(globalThis.navigator?.deviceMemory || 0);
         const lowMemoryDevice = Number.isFinite(deviceMemory) && deviceMemory > 0 && deviceMemory <= 8;
-        const heavyByCount = itemCount >= 140;
-        const mobileHeavy = coarsePointer && itemCount >= 90;
-        const webBaseline = !extensionApi;
-        return webBaseline || lowMemoryDevice || heavyByCount || mobileHeavy;
+        const heavyThreshold = webClient ? 240 : 140;
+        const mobileThreshold = webClient ? 150 : 90;
+        const lowMemoryThreshold = webClient ? 80 : 48;
+        const lowMemoryHeavyEnough = lowMemoryDevice && itemCount >= lowMemoryThreshold;
+        const heavyByCount = itemCount >= heavyThreshold;
+        const mobileHeavy = coarsePointer && itemCount >= mobileThreshold;
+        return lowMemoryHeavyEnough || heavyByCount || mobileHeavy;
     }
 
     function applyAdaptiveMemoryMode(space = getActiveSpace()) {
